@@ -2,8 +2,11 @@ package org.launchcode.javawebdevtechjobspersistent.controllers;
 
 import org.launchcode.javawebdevtechjobspersistent.models.Job;
 import org.launchcode.javawebdevtechjobspersistent.models.JobData;
+import org.launchcode.javawebdevtechjobspersistent.models.data.EmployerRepository;
 import org.launchcode.javawebdevtechjobspersistent.models.data.JobRepository;
+import org.launchcode.javawebdevtechjobspersistent.models.data.SkillRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +24,12 @@ public class SearchController {
     @Autowired
     private JobRepository jobRepository;
 
+    @Autowired
+    private SkillRepository skillRepository;
+
+    @Autowired
+    private EmployerRepository employerRepository;
+
     @RequestMapping("")
     public String search(Model model) {
         model.addAttribute("columns", columnChoices);
@@ -30,10 +39,11 @@ public class SearchController {
     @PostMapping("results")
     public String displaySearchResults(Model model, @RequestParam String searchType, @RequestParam String searchTerm){
         Iterable<Job> jobs;
-        if (searchTerm.toLowerCase().equals("all") || searchTerm.equals("")){
+        if (searchType.toLowerCase().equals("all") || searchTerm.equals("")){
             jobs = jobRepository.findAll();
         } else {
             jobs = JobData.findByColumnAndValue(searchType, searchTerm, jobRepository.findAll());
+            //jobs = JobData.findByValue(searchTerm, jobs);
         }
         model.addAttribute("columns", columnChoices);
         model.addAttribute("title", "Jobs with " + columnChoices.get(searchType) + ": " + searchTerm);
